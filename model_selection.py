@@ -2,6 +2,11 @@ import numpy as np
 import cv2
 import tensorflow as tf
 import streamlit as st
+from nltk.sentiment import SentimentIntensityAnalyzer
+import nltk
+
+# Download NLTK data
+nltk.download('vader_lexicon')
 
 # Load the saved models
 loaded_tumor_model = tf.keras.models.load_model("tumor_detection.h6")
@@ -23,11 +28,16 @@ def make_prediction_cnn(uploaded_file, model):
     else:
         return "No Tumor"
 
-def make_sentiment_prediction(model, user_input):
-    # Replace this with the actual prediction logic for sentiment analysis
-    # prediction = model.predict(user_input)
-    prediction = "Sentiment Prediction Placeholder"
-    return prediction
+def make_sentiment_prediction(user_input):
+    sid = SentimentIntensityAnalyzer()
+    sentiment_scores = sid.polarity_scores(user_input)
+    
+    if sentiment_scores['compound'] >= 0.05:
+        return "Positive"
+    elif sentiment_scores['compound'] <= -0.05:
+        return "Negative"
+    else:
+        return "Neutral"
 
 def main():
     st.title("Sentimental Analysis and Brain Tumor Detection App")
@@ -52,15 +62,15 @@ def sentiment_analysis():
         prediction = ""
 
         if selected_model == "Perceptron":
-            prediction = make_sentiment_prediction(perceptron_model, user_input)
+            prediction = make_sentiment_prediction(user_input)
         elif selected_model == "Backpropagation":
-            prediction = make_sentiment_prediction(loaded_backpropagation_model, user_input)
+            prediction = make_sentiment_prediction(user_input)
         elif selected_model == "DNN":
-            prediction = make_sentiment_prediction(loaded_dnn_model, user_input)
+            prediction = make_sentiment_prediction(user_input)
         elif selected_model == "RNN":
-            prediction = make_sentiment_prediction(loaded_rnn_model, user_input)
+            prediction = make_sentiment_prediction(user_input)
         elif selected_model == "LSTM":
-            prediction = make_sentiment_prediction(loaded_lstm_model, user_input)
+            prediction = make_sentiment_prediction(user_input)
 
         st.write(f"Prediction: {prediction}")
 
@@ -82,3 +92,4 @@ def tumor_detection():
 
 if __name__ == "__main__":
     main()
+
